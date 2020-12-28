@@ -22,7 +22,7 @@ jobs:
 
   build_openwrt:
 
-    name: Build OpenWrt firmware
+    name: 编译OpenWrt
 
     runs-on: ubuntu-latest
 
@@ -30,12 +30,12 @@ jobs:
 
     steps:
 
-      - name: Checkout
+      - name: 校验文件
         uses: actions/checkout@v2
         with:
           ref: master
 
-      - name: Space cleanup
+      - name: 清理环境
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
@@ -46,6 +46,12 @@ jobs:
           sudo -E apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch python3 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler antlr3 gperf swig
           sudo -E apt-get -y autoremove --purge
           sudo -E apt-get clean
+          
+      - name: 同步最新的源码
+        run: |
+          git remote add openwrt https://github.com/coolsnowwolf/lede.git
+          git pull openwrt master
+          git remote -v
           
       - name: 涡轮增雕进程
         run: |
@@ -70,7 +76,7 @@ jobs:
           ./scripts/feeds update -a
           ./scripts/feeds install -a
 
-      - name: Generate configuration file
+      - name: 生成配置文件
         run: |
           rm -f ./.config*
           touch ./.config
@@ -109,6 +115,12 @@ jobs:
           CONFIG_TARGET_x86_64=y
           CONFIG_TARGET_x86_64_Generic=y
           EOF
+          # 设置固件大小:
+          cat >> .config <<EOF
+          CONFIG_ROOT_filesystem_partition_size
+          CONFIG_TARGET_KERNEL_PARTSIZE=256
+          CONFIG_TARGET_ROOTFS_PARTSIZE=1024
+          EOF
           # 固件压缩:
           cat >> .config <<EOF
           CONFIG_TARGET_IMAGES_GZIP=y
@@ -143,11 +155,13 @@ jobs:
           cat >> .config <<EOF
           CONFIG_PACKAGE_luci-app-adbyby-plus=y
           CONFIG_PACKAGE_luci-app-aria2=y
-          CONFIG_PACKAGE_luci-app-baidupcs-web=y
+          CONFIG_PACKAGE_luci-app-arpbind=y
+          # CONFIG_PACKAGE_luci-app-baidupcs-web=y
           CONFIG_PACKAGE_luci-app-docker=y
           CONFIG_PACKAGE_luci-app-frpc=y
           CONFIG_PACKAGE_luci-app-kodexplorer=y
           CONFIG_PACKAGE_luci-app-minidlna=y
+          CONFIG_PACKAGE_luci-app-upnp=y
           CONFIG_PACKAGE_luci-app-openvpn=y
           CONFIG_PACKAGE_luci-app-openvpn-server=y
           CONFIG_PACKAGE_luci-app-qbittorrent=y
@@ -158,6 +172,7 @@ jobs:
           CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_V2ray=y
           CONFIG_PACKAGE_luci-app-ttyd=y
           CONFIG_PACKAGE_luci-app-v2ray-server=y
+          CONFIG_PACKAGE_luci-app-v2ray-pro=y
           CONFIG_PACKAGE_luci-app-verysync=y
           CONFIG_PACKAGE_luci-app-webadmin=y
           CONFIG_PACKAGE_luci-app-wireguard=y
@@ -197,7 +212,7 @@ jobs:
           rm -rf $(find ./dl/ -size -1024c)
           df -h
 
-      - name: Compile firmware
+      - name: 编译固件
         run: |
           make -j$(nproc) || make -j1 V=s
           echo "======================="
