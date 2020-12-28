@@ -50,7 +50,7 @@ jobs:
       - name: 同步最新的源码
         run: |
           git remote add openwrt https://github.com/coolsnowwolf/lede.git
-          git pull openwrt master
+          git pull openwrt master --allow-unrelated-histories
           git remote -v
           
       - name: 涡轮增雕进程
@@ -156,7 +156,6 @@ jobs:
           CONFIG_PACKAGE_luci-app-adbyby-plus=y
           CONFIG_PACKAGE_luci-app-aria2=y
           CONFIG_PACKAGE_luci-app-arpbind=y
-          
           CONFIG_PACKAGE_luci-app-docker=y
           CONFIG_PACKAGE_luci-app-frpc=y
           CONFIG_PACKAGE_luci-app-kodexplorer=y
@@ -208,7 +207,7 @@ jobs:
 
       - name: Make download
         run: |
-          make download -j8 || make download -j1 V=s
+          make download -j8
           rm -rf $(find ./dl/ -size -1024c)
           df -h
 
