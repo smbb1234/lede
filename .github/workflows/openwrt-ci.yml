@@ -49,6 +49,8 @@ jobs:
           
       - name: 同步最新的源码
         run: |
+          git config --global user.email "peter_926@live.cn"
+          git config --global user.name "Steve"
           git remote add openwrt https://github.com/coolsnowwolf/lede.git
           git pull openwrt master --allow-unrelated-histories
           git remote -v
