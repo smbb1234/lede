@@ -7,7 +7,7 @@
 # <https://github.com/KFERMercer/OpenWrt-CI>
 
 
-name: OpenWrt-CI
+name: 更新自定义插件与主题
 
 on:
   push:
@@ -48,25 +48,16 @@ jobs:
           sudo -E apt-get clean
           df -h
           
-      - name: 涡轮增雕进程
+      - name: 下载主题源码
         run: |
           cd package
-          mkdir openwrt-packages_1
-          cd openwrt-packages_1
+          mkdir openwrt-packages
+          cd openwrt-packages
           git clone https://github.com/openwrt-develop/luci-theme-atmaterial.git
-
-          # sudo mkdir -p -m 777 /mnt/openwrt/bin /mnt/openwrt/build_dir/host /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/dl /mnt/openwrt/feeds /mnt/openwrt/staging_dir
-          # ln -s /mnt/openwrt/bin ./bin
-          # mkdir -p ./build_dir
-          # ln -s -f /mnt/openwrt/build_dir/host ./build_dir/host
-          # ln -s -f /mnt/openwrt/build_dir/hostpkg ./build_dir/hostpkg
-          # ln -s /mnt/openwrt/dl ./dl
-          # ln -s /mnt/openwrt/feeds ./feeds
-          # ln -s /mnt/openwrt/staging_dir ./staging_dir
-
+          git clone https://github.com/apollo-ng/luci-theme-darkmatter.git
           df -h 
-
-      - name: Update feeds
+    
+      - name: 更新源码
         run: |
           sed -i 's/#src-git helloworld/src-git helloworld/g' ./feeds.conf.default
           ./scripts/feeds update -a
@@ -167,17 +158,20 @@ jobs:
           CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_V2ray=y
           CONFIG_PACKAGE_luci-app-ttyd=y
           CONFIG_PACKAGE_luci-app-v2ray-server=y
-          # CONFIG_PACKAGE_luci-app-v2ray=y
           CONFIG_PACKAGE_luci-app-verysync=y
           CONFIG_PACKAGE_luci-app-webadmin=y
           CONFIG_PACKAGE_luci-app-wireguard=y
           CONFIG_PACKAGE_luci-app-wrtbwmon=y
+          CONFIG_PACKAGE_luci-app-samba4=y
+          CONFIG_PACKAGE_luci-app-vsftpd=y
+          CONFIG_PACKAGE_luci-app-syncdial=y
           EOF
           # LuCI主题:
           cat >> .config <<EOF
           CONFIG_PACKAGE_luci-theme-argon=y
           CONFIG_PACKAGE_luci-theme-netgear=y
           CONFIG_PACKAGE_luci-theme-atmaterial=y
+          CONFIG_PACKAGE_luci-theme-darkmatter=y
           EOF
           # 常用软件包:
           cat >> .config <<EOF
@@ -188,6 +182,12 @@ jobs:
           CONFIG_PACKAGE_tree=y
           CONFIG_PACKAGE_vim-fuller=y
           CONFIG_PACKAGE_wget=y
+          CONFIG_PACKAGE_autosamba=y
+          CONFIG_PACKAGE_samba4=y
+          CONFIG_PACKAGE_vsftpd-alt=y
+          CONFIG_PACKAGE_v2ray=y
+          CONFIG_PACKAGE_v2ray-plugin=y
+          CONFIG_PACKAGE_ddns-scripts_aliyun=y
           EOF
           # 取消编译VMware镜像以及镜像填充 (不要删除被缩进的注释符号):
           # cat >> .config <<EOF
@@ -201,14 +201,10 @@ jobs:
           sed -i 's/^[ \t]*//g' ./.config
           make defconfig
 
-      - name: Make download
+      - name: 下载源码
         run: |
           make download -j8
           find dl -size -1024c -exec rm -f {} \;
-        # run: |
-        #   make download -j8
-        #  rm -rf $(find ./dl/ -size -1024c)
-        #   df -h
 
       - name: 编译固件
         run: |
@@ -222,7 +218,7 @@ jobs:
           du -h --max-depth=1 ./build_dir
           du -h --max-depth=1 ./bin
 
-      - name: Prepare artifact
+      - name: 编译完成准备上传
         run: |
           mkdir -p ./artifact/firmware
           mkdir -p ./artifact/package
@@ -232,25 +228,25 @@ jobs:
           cp -rf $(find ./bin/packages/ -type f -name "*.ipk") ./artifact/package/
           cp -rf $(find ./bin/targets/ -type f -name "*.buildinfo" -o -name "*.manifest") ./artifact/buildinfo/
 
-      - name: Deliver buildinfo
+      - name: 上传buildinfo
         uses: actions/upload-artifact@v2
         with:
           name: OpenWrt_buildinfo
           path: ./artifact/buildinfo/
 
-      - name: Deliver package
+      - name: 上传package
         uses: actions/upload-artifact@v2
         with:
           name: OpenWrt_package
           path: ./artifact/package/
 
-      - name: Deliver firmware
+      - name: 上传firmware
         uses: actions/upload-artifact@v2
         with:
           name: OpenWrt_firmware
           path: ./bin/targets/
 
-      - name: Upload release asset
+      - name: 上传成功
         if: github.event == 'release'
         uses: svenstaro/upload-release-action@v2
         with:
