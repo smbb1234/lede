@@ -50,8 +50,8 @@ jobs:
       - name: 涡轮增雕进程
         run: |
           cd package
-          mkdir openwrt-packages
-          cd openwrt-packages
+          mkdir openwrt-packages_1
+          cd openwrt-packages_1
           git clone https://github.com/openwrt-develop/luci-theme-atmaterial.git
 
           # sudo mkdir -p -m 777 /mnt/openwrt/bin /mnt/openwrt/build_dir/host /mnt/openwrt/build_dir/hostpkg /mnt/openwrt/dl /mnt/openwrt/feeds /mnt/openwrt/staging_dir
@@ -64,6 +64,14 @@ jobs:
           # ln -s /mnt/openwrt/staging_dir ./staging_dir
 
           df -h
+          
+      - name: v2ray
+        run: |
+          cd package
+          mkdir openwrt-packages_2
+          cd openwrt-packages_2
+          git clone https://github.com/kuoruan/luci-app-v2ray.git
+          df -h   
 
       - name: Update feeds
         run: |
@@ -112,8 +120,8 @@ jobs:
           # 设置固件大小:
           cat >> .config <<EOF
           CONFIG_ROOT_filesystem_partition_size
-          CONFIG_TARGET_KERNEL_PARTSIZE=256
-          CONFIG_TARGET_ROOTFS_PARTSIZE=1024
+          CONFIG_TARGET_KERNEL_PARTSIZE=384
+          CONFIG_TARGET_ROOTFS_PARTSIZE=2048
           EOF
           # 固件压缩:
           cat >> .config <<EOF
@@ -165,7 +173,7 @@ jobs:
           CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_V2ray=y
           CONFIG_PACKAGE_luci-app-ttyd=y
           CONFIG_PACKAGE_luci-app-v2ray-server=y
-          CONFIG_PACKAGE_luci-app-v2ray-pro=y
+          CONFIG_PACKAGE_luci-app-v2ray=y
           CONFIG_PACKAGE_luci-app-verysync=y
           CONFIG_PACKAGE_luci-app-webadmin=y
           CONFIG_PACKAGE_luci-app-wireguard=y
