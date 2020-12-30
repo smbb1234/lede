@@ -162,7 +162,7 @@ jobs:
           CONFIG_PACKAGE_luci-app-webadmin=y
           CONFIG_PACKAGE_luci-app-wireguard=y
           CONFIG_PACKAGE_luci-app-wrtbwmon=y
-          CONFIG_PACKAGE_luci-app-samba4=y
+          # CONFIG_PACKAGE_luci-app-samba4=y
           CONFIG_PACKAGE_luci-app-vsftpd=y
           CONFIG_PACKAGE_luci-app-syncdial=y
           EOF
@@ -182,8 +182,8 @@ jobs:
           CONFIG_PACKAGE_tree=y
           CONFIG_PACKAGE_vim-fuller=y
           CONFIG_PACKAGE_wget=y
-          CONFIG_PACKAGE_autosamba=y
-          CONFIG_PACKAGE_samba4=y
+          # CONFIG_PACKAGE_autosamba=y
+          # CONFIG_PACKAGE_samba4=y
           CONFIG_PACKAGE_vsftpd-alt=y
           CONFIG_PACKAGE_v2ray=y
           CONFIG_PACKAGE_v2ray-plugin=y
